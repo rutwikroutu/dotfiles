@@ -1,43 +1,35 @@
-cat > ~/dotfiles/install.sh <<'SH'
 #!/usr/bin/env bash
-set -euo pipefail
+set -e
 
 DOTFILES="$HOME/dotfiles"
+CONFIG="$HOME/.config"
 
-link() {
-  local src="$1"
-  local dst="$2"
+echo "🔧 Installing dotfiles from $DOTFILES"
 
-  mkdir -p "$(dirname "$dst")"
+# Ensure base dirs exist
+mkdir -p "$CONFIG"
 
-  if [ -L "$dst" ]; then
-    echo "OK (already linked): $dst"
-    return
-  fi
-
-  if [ -e "$dst" ]; then
-    echo "Backing up existing $dst -> ${dst}.bak"
-    mv "$dst" "${dst}.bak"
-  fi
-
-  ln -s "$src" "$dst"
-  echo "Linked $dst -> $src"
-}
-
-# Neovim
-link "$DOTFILES/nvim" "$HOME/.config/nvim"
-
-# tmux
-link "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
-
-# tmuxinator: support both common paths
-if [ -d "$DOTFILES/tmuxinator" ]; then
-  # Prefer ~/.config/tmuxinator on Linux
-  link "$DOTFILES/tmuxinator" "$HOME/.config/tmuxinator"
+# --- Neovim ---
+if [[ ! -f "$DOTFILES/nvim/init.vim" && ! -f "$DOTFILES/nvim/init.lua" ]]; then
+  echo "❌ Neovim config not found in $DOTFILES/nvim"
+  exit 1
 fi
 
-echo "Done."
-SH
+ln -sfn "$DOTFILES/nvim" "$CONFIG/nvim"
+echo "✅ Linked Neovim config"
 
-chmod +x ~/dotfiles/install.sh
+# --- tmux ---
+if [[ ! -f "$DOTFILES/tmux/.tmux.conf" ]]; then
+  echo "❌ tmux config not found"
+  exit 1
+fi
+
+ln -sfn "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
+echo "✅ Linked tmux config"
+
+# --- tmuxinator ---
+ln -sfn "$DOTFILES/tmuxinator" "$CONFIG/tmuxinator"
+echo "✅ Linked tmuxinator config"
+
+echo "🎉 Dotfiles installation complete"
 
