@@ -1,0 +1,18 @@
+name: dev
+root: ~
+
+windows:
+  - editor:
+      layout: main-horizontal
+      panes:
+        - nvim
+        -
+
+  - server:
+      panes:
+        - # shell (run server manually)
+
+  - logs:
+      panes:
+        - # tail -f logs, etc.
+
